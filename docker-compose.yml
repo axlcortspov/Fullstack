@@ -1,71 +1,98 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql_db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3307:3306"
-    networks:
-      - red_microservicios
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    mysql:
+        image: mysql:8.0
+        container_name: mysql_db
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+        ports:
+            - "3307:3306"
+        networks:
+            - red_microservicios
+        volumes:
+            - mysql_data:/var/lib/mysql
+            - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  auth-service:
-    build: ./servicios/auth-service
-    container_name: auth_service
-    ports:
-      - "8081:8080"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - red_microservicios
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/auth_db
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+    auth-service:
+        build: ./servicios/auth-service
+        container_name: auth_service
+        ports:
+            - "8081:8080"
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - red_microservicios
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/auth_db
+            SPRING_DATASOURCE_USERNAME: root
+            SPRING_DATASOURCE_PASSWORD: root
 
-  user-service:
-    build: ./servicios/user-service
-    container_name: user_service
-    ports:
-      - "8082:8080"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - red_microservicios
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/user_db
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+    user-service:
+        build: ./servicios/user-service
+        container_name: user_service
+        ports:
+            - "8082:8080"
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - red_microservicios
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/user_db
+            SPRING_DATASOURCE_USERNAME: root
+            SPRING_DATASOURCE_PASSWORD: root
 
-  product-service:
-    build: ./servicios/product-service
-    container_name: product_service
-    ports:
-      - "8083:8080"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - red_microservicios
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/product_db
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+    product-service:
+        build: ./servicios/product-service
+        container_name: product_service
+        ports:
+            - "8083:8080"
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - red_microservicios
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/product_db
+            SPRING_DATASOURCE_USERNAME: root
+            SPRING_DATASOURCE_PASSWORD: root
+    cart-service:
+        build: ./servicios/cart-service
+        container_name: cart_service
+        ports:
+            - "8084:8080"
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - red_microservicios
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cart_db
+            SPRING_DATASOURCE_USERNAME: root
+            SPRING_DATASOURCE_PASSWORD: root
+    order-service:
+        build: ./servicios/order-service
+        container_name: order_service
+        ports:
+            - "8085:8080"
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - red_microservicios
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_db
+            SPRING_DATASOURCE_USERNAME: root
+            SPRING_DATASOURCE_PASSWORD: root
 
 networks:
-  red_microservicios:
+    red_microservicios:
 
 volumes:
-  mysql_data:
-  
+    mysql_data:
