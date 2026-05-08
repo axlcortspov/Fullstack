@@ -90,7 +90,20 @@ services:
             SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_db
             SPRING_DATASOURCE_USERNAME: root
             SPRING_DATASOURCE_PASSWORD: root
-
+    payment-service:
+        build: ./servicios/payment-service
+        container_name: payment_service
+        ports:
+            - "8086:8080"
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - red_microservicios
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/payment_db
+            SPRING_DATASOURCE_USERNAME: root
+            SPRING_DATASOURCE_PASSWORD: root
 networks:
     red_microservicios:
 
