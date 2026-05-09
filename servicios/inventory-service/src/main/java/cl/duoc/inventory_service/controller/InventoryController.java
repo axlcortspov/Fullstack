@@ -1,10 +1,12 @@
 package cl.duoc.inventory_service.controller;
 
+import cl.duoc.inventory_service.dto.InventoryResponseDTO;
 import cl.duoc.inventory_service.model.Inventory;
 import cl.duoc.inventory_service.service.InventoryService;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/inventory")
@@ -17,32 +19,46 @@ public class InventoryController {
     }
 
     @GetMapping
-    public List<Inventory> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<Inventory>> getAll() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/product/{productId}")
-    public List<Inventory> getByProductId(@PathVariable Long productId) {
-        return service.findByProductId(productId);
+    public ResponseEntity<List<Inventory>> getByProductId(@PathVariable Long productId) {
+        return ResponseEntity.ok(service.findByProductId(productId));
     }
 
+    // Endpoint enriquecido: inventario con datos del producto vía Feign
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<InventoryResponseDTO> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findByIdWithProduct(id));
+    }
+
+    // Al crear, valida que el producto exista en product-service
     @PostMapping
-    public Inventory create(@RequestBody Inventory inventory) {
-        return service.create(inventory);
+    public ResponseEntity<Inventory> create(@RequestBody Inventory inventory) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(inventory));
     }
 
     @PutMapping("/{id}")
-    public Inventory update(@PathVariable Long id, @RequestBody Inventory inventory) {
-        return service.update(id, inventory);
+    public ResponseEntity<Inventory> update(
+            @PathVariable Long id,
+            @RequestBody Inventory inventory
+    ) {
+        return ResponseEntity.ok(service.update(id, inventory));
     }
 
     @PutMapping("/{id}/stock")
-    public Inventory updateStock(@PathVariable Long id, @RequestParam Integer stock) {
-        return service.updateStock(id, stock);
+    public ResponseEntity<Inventory> updateStock(
+            @PathVariable Long id,
+            @RequestParam Integer stock
+    ) {
+        return ResponseEntity.ok(service.updateStock(id, stock));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

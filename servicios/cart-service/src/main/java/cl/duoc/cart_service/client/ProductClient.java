@@ -1,0 +1,13 @@
+package cl.duoc.cart_service.client;
+
+import cl.duoc.cart_service.dto.ProductDTO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@FeignClient(name = "product-service-cart", url = "${feign.product-service.url}")
+public interface ProductClient {
+
+    @GetMapping("/products/{id}")
+    ProductDTO getProductById(@PathVariable("id") Long id);
+}

@@ -1,10 +1,12 @@
 package cl.duoc.review_service.controller;
 
+import cl.duoc.review_service.dto.ReviewResponseDTO;
 import cl.duoc.review_service.model.Review;
 import cl.duoc.review_service.service.ReviewService;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/reviews")
@@ -17,32 +19,41 @@ public class ReviewController {
     }
 
     @GetMapping
-    public List<Review> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<Review>> getAll() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/product/{productId}")
-    public List<Review> getByProductId(@PathVariable Long productId) {
-        return service.findByProductId(productId);
+    public ResponseEntity<List<Review>> getByProductId(@PathVariable Long productId) {
+        return ResponseEntity.ok(service.findByProductId(productId));
     }
 
     @GetMapping("/user/{userId}")
-    public List<Review> getByUserId(@PathVariable Long userId) {
-        return service.findByUserId(userId);
+    public ResponseEntity<List<Review>> getByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.findByUserId(userId));
+    }
+
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<ReviewResponseDTO> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findByIdWithDetails(id));
     }
 
     @PostMapping
-    public Review create(@RequestBody Review review) {
-        return service.create(review);
+    public ResponseEntity<Review> create(@RequestBody Review review) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(review));
     }
 
     @PutMapping("/{id}")
-    public Review update(@PathVariable Long id, @RequestBody Review review) {
-        return service.update(id, review);
+    public ResponseEntity<Review> update(
+            @PathVariable Long id,
+            @RequestBody Review review
+    ) {
+        return ResponseEntity.ok(service.update(id, review));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

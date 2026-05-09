@@ -1,10 +1,12 @@
 package cl.duoc.payment_service.controller;
 
+import cl.duoc.payment_service.dto.PaymentResponseDTO;
 import cl.duoc.payment_service.model.Payment;
 import cl.duoc.payment_service.service.PaymentService;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/payments")
@@ -17,32 +19,40 @@ public class PaymentController {
     }
 
     @GetMapping
-    public List<Payment> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<Payment>> getAll() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/order/{orderId}")
-    public List<Payment> getByOrderId(@PathVariable Long orderId) {
-        return service.findByOrderId(orderId);
+    public ResponseEntity<List<Payment>> getByOrderId(@PathVariable Long orderId) {
+        return ResponseEntity.ok(service.findByOrderId(orderId));
     }
 
+    // Endpoint enriquecido: pago con datos de la orden (via Feign)
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<PaymentResponseDTO> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findByIdWithOrder(id));
+    }
+
+    // Al crear, valida que la orden exista en order-service
     @PostMapping
-    public Payment create(@RequestBody Payment payment) {
-        return service.create(payment);
+    public ResponseEntity<Payment> create(@RequestBody Payment payment) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(payment));
     }
 
     @PutMapping("/{id}")
-    public Payment update(@PathVariable Long id, @RequestBody Payment payment) {
-        return service.update(id, payment);
+    public ResponseEntity<Payment> update(@PathVariable Long id, @RequestBody Payment payment) {
+        return ResponseEntity.ok(service.update(id, payment));
     }
 
     @PutMapping("/{id}/status")
-    public Payment updateStatus(@PathVariable Long id, @RequestParam String status) {
-        return service.updateStatus(id, status);
+    public ResponseEntity<Payment> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        return ResponseEntity.ok(service.updateStatus(id, status));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

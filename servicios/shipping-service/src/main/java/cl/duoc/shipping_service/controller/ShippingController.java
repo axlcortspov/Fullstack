@@ -1,10 +1,12 @@
 package cl.duoc.shipping_service.controller;
 
+import cl.duoc.shipping_service.dto.ShippingResponseDTO;
 import cl.duoc.shipping_service.model.Shipping;
 import cl.duoc.shipping_service.service.ShippingService;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/shipping")
@@ -17,32 +19,41 @@ public class ShippingController {
     }
 
     @GetMapping
-    public List<Shipping> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<Shipping>> getAll() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/order/{orderId}")
-    public List<Shipping> getByOrderId(@PathVariable Long orderId) {
-        return service.findByOrderId(orderId);
+    public ResponseEntity<List<Shipping>> getByOrderId(@PathVariable Long orderId) {
+        return ResponseEntity.ok(service.findByOrderId(orderId));
+    }
+
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<ShippingResponseDTO> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findByIdWithOrder(id));
     }
 
     @PostMapping
-    public Shipping create(@RequestBody Shipping shipping) {
-        return service.create(shipping);
+    public ResponseEntity<Shipping> create(@RequestBody Shipping shipping) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(shipping));
     }
 
     @PutMapping("/{id}")
-    public Shipping update(@PathVariable Long id, @RequestBody Shipping shipping) {
-        return service.update(id, shipping);
+    public ResponseEntity<Shipping> update(@PathVariable Long id, @RequestBody Shipping shipping) {
+        return ResponseEntity.ok(service.update(id, shipping));
     }
 
     @PutMapping("/{id}/status")
-    public Shipping updateStatus(@PathVariable Long id, @RequestParam String status) {
-        return service.updateStatus(id, status);
+    public ResponseEntity<Shipping> updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status
+    ) {
+        return ResponseEntity.ok(service.updateStatus(id, status));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

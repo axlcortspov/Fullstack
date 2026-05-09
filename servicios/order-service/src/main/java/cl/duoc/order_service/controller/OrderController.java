@@ -1,14 +1,17 @@
 package cl.duoc.order_service.controller;
 
+import cl.duoc.order_service.dto.OrderResponseDTO;
 import cl.duoc.order_service.model.Order;
 import cl.duoc.order_service.service.OrderService;
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-
+    
     private final OrderService service;
 
     public OrderController(OrderService service) {
@@ -16,30 +19,41 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Order> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<Order>> getAll() {
+        return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @GetMapping("/user/{userId}")
-    public List<Order> getByUser(@PathVariable Long userId) {
-        return service.findByUser(userId);
+    public ResponseEntity<List<Order>> getByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.findByUser(userId));
+    }
+
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<OrderResponseDTO> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findByIdWithUser(id));
     }
 
     @PostMapping
-    public Order create(@RequestBody Order order) {
-        return service.create(order);
+    public ResponseEntity<Order> create(@RequestBody Order order) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(order));
     }
 
     @PutMapping("/{id}/status")
-    public Order updateStatus(
+    public ResponseEntity<Order> updateStatus(
         @PathVariable Long id,
         @RequestParam String status
     ) {
-        return service.updateStatus(id, status);
+        return ResponseEntity.ok(service.updateStatus(id, status));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
