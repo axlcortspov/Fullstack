@@ -118,6 +118,20 @@ services:
             SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/inventory_db
             SPRING_DATASOURCE_USERNAME: root
             SPRING_DATASOURCE_PASSWORD: root
+    notification-service:
+        build: ./servicios/notification-service
+        container_name: notification_service
+        ports:
+            - "8088:8080"
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - red_microservicios
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/notification_db
+            SPRING_DATASOURCE_USERNAME: root
+            SPRING_DATASOURCE_PASSWORD: root
 networks:
     red_microservicios:
 
