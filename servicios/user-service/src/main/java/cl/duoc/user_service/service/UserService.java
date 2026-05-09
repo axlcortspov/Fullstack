@@ -28,4 +28,8 @@ public class UserService {
     public void delete(Long id) {
         repo.deleteById(id);
     }
+    public User findById(Long id) {
+    return repo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+}
 }
