@@ -1,6 +1,7 @@
 package cl.duoc.order_service.service;
 
 import cl.duoc.order_service.client.UserClient;
+import cl.duoc.order_service.dto.OrderRequestDTO;
 import cl.duoc.order_service.dto.OrderResponseDTO;
 import cl.duoc.order_service.dto.UserDTO;
 import cl.duoc.order_service.exception.OrderNotFoundException;
@@ -38,20 +39,24 @@ public class OrderService {
         return repository.findByUserId(userId);
     }
 
-    public Order create(Order order) {
-        log.info("[order-service] Validando usuario id={} en user-service", order.getUserId());
+    public Order create(OrderRequestDTO dto) {
+        log.info("[order-service] Validando usuario id={} en user-service", dto.getUserId());
         try {
-            UserDTO user = userClient.getUserById(order.getUserId());
-            log.info("[order-service] Usuario encontrado: username={}", user.getUsername());
+            UserDTO user = userClient.getUserById(dto.getUserId());
+            log.info("[order-service] Usuario encontrado: name={}", user.getName());
         } catch (FeignException.NotFound ex) {
-            log.warn("[order-service] Usuario id={} no encontrado en user-service", order.getUserId());
-            throw new UserNotFoundException(order.getUserId());
+            log.warn("[order-service] Usuario id={} no encontrado en user-service", dto.getUserId());
+            throw new UserNotFoundException(dto.getUserId());
         } catch (FeignException ex) {
             log.error("[order-service] Error al contactar user-service: {}", ex.getMessage());
             throw new ServiceUnavailableException("user-service");
         }
 
+        Order order = new Order();
+        order.setUserId(dto.getUserId());
+        order.setTotal(dto.getTotal());
         order.setStatus("PENDING");
+
         Order saved = repository.save(order);
         log.info("[order-service] Order creada con id={}", saved.getId());
         return saved;

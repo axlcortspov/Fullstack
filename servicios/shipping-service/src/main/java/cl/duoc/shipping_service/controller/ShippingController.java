@@ -1,8 +1,11 @@
 package cl.duoc.shipping_service.controller;
 
+import cl.duoc.shipping_service.dto.ShippingRequestDTO;
 import cl.duoc.shipping_service.dto.ShippingResponseDTO;
 import cl.duoc.shipping_service.model.Shipping;
 import cl.duoc.shipping_service.service.ShippingService;
+import jakarta.validation.Valid;
+
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +36,6 @@ public class ShippingController {
         return ResponseEntity.ok(service.findByIdWithOrder(id));
     }
 
-    @PostMapping
-    public ResponseEntity<Shipping> create(@RequestBody Shipping shipping) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(shipping));
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<Shipping> update(@PathVariable Long id, @RequestBody Shipping shipping) {
         return ResponseEntity.ok(service.update(id, shipping));
@@ -55,5 +53,12 @@ public class ShippingController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+    @PostMapping
+    public ResponseEntity<Shipping> create(@Valid @RequestBody ShippingRequestDTO dto) {
+        Shipping shipping = new Shipping();
+        shipping.setOrderId(dto.getOrderId());
+        shipping.setAddress(dto.getAddress());
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(shipping));
     }
 }
