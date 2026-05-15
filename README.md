@@ -1,48 +1,214 @@
-# Proyecto Semestral: ShopFlow
+# ShopFlow — Plataforma de E-Commerce con Microservicios
 
-## Integrante
-- Axel Cortés
-
-## Descripción del Sistema
-
-**ShopFlow** es un sistema de comercio electrónico basado en arquitectura de microservicios.  
-El sistema permite gestionar usuarios, autenticación, productos, carrito de compras, órdenes, pagos, inventario, notificaciones, reseñas y envíos.
-
-Cada microservicio posee su propia responsabilidad, su propia API REST y su propia base de datos.  
-La comunicación entre servicios se realiza mediante **Feign Client**, respetando la regla de que un microservicio nunca debe acceder directamente a la base de datos de otro.
+**Grupo 10 · DSY1103 Desarrollo FullStack 1 · Duoc UC 2026**  
+**Integrante:** Axel Cortés
 
 ---
 
-## Estado del Sistema
+## Descripción del proyecto
 
-| Microservicio        | Puerto | DB Name          | Funcionalidad                         |
-| :------------------- | :----- | :--------------- | :------------------------------------ |
-| Auth-Service         | 8081   | auth_db          | Registro y Login                      |
-| User-Service         | 8082   | user_db          | Gestión de usuarios                   |
-| Product-Service      | 8083   | product_db       | Gestión de productos                  |
-| Cart-Service         | 8084   | cart_db          | Gestión de carrito de compras         |
-| Order-Service        | 8085   | order_db         | Gestión de órdenes                    |
-| Payment-Service      | 8086   | payment_db       | Gestión de pagos                      |
-| Inventory-Service    | 8087   | inventory_db     | Control de stock                      |
-| Notification-Service | 8088   | notification_db  | Gestión de notificaciones             |
-| Review-Service       | 8089   | review_db        | Reseñas de productos                  |
-| Shipping-Service     | 8090   | shipping_db      | Gestión de envíos                     |
+ShopFlow es una plataforma de e-commerce construida sobre una arquitectura de microservicios. El sistema permite gestionar el ciclo completo de una compra en línea: registro de usuarios, catálogo de productos, carrito de compras, órdenes, pagos, envíos, notificaciones, reseñas e inventario.
+
+Cada microservicio es independiente, tiene su propia base de datos y se comunica con otros servicios mediante **Feign Client** (Spring Cloud OpenFeign).
 
 ---
 
-## Despliegue Técnico
+## Arquitectura del sistema
 
-- **Instancia:** AWS EC2 t3.large (Ubuntu 24.04)
-- **Arquitectura:** Microservicios
-- **Framework:** Spring Boot
-- **Base de datos:** MySQL 8.0
-- **Orquestación:** Docker Compose
-- **Cliente REST interno:** Spring Cloud OpenFeign
-- **Manejo de errores:** `@RestControllerAdvice` + excepciones personalizadas
-- **Logs:** SLF4J
-- **Repositorio Maestro:** https://github.com/axlcortspov/Fullstack
+El sistema está compuesto por **10 microservicios**, cada uno corriendo en su propio contenedor Docker:
 
-### Comando de inicio
+| Servicio | Puerto | Descripción |
+|---|---|---|
+| auth-service | 8081 | Registro e inicio de sesión |
+| user-service | 8082 | Gestión de usuarios |
+| product-service | 8083 | Catálogo de productos |
+| cart-service | 8084 | Carrito de compras |
+| order-service | 8085 | Órdenes de compra |
+| payment-service | 8086 | Pagos |
+| inventory-service | 8087 | Control de stock |
+| notification-service | 8088 | Notificaciones |
+| review-service | 8089 | Reseñas de productos |
+| shipping-service | 8090 | Envíos y seguimiento |
 
+### Dependencias entre servicios (Feign Client)
+
+```
+cart-service          → user-service, product-service
+order-service         → user-service
+payment-service       → order-service
+shipping-service      → order-service
+notification-service  → user-service
+review-service        → user-service, product-service
+inventory-service     → product-service
+```
+
+`auth-service`, `user-service` y `product-service` no consumen servicios externos.
+
+---
+
+## Funcionalidades implementadas
+
+- CRUD completo en los 10 microservicios
+- Comunicación entre servicios via **Feign Client** con logs SLF4J
+- **DTOs** de entrada y salida en todos los servicios (no se exponen entidades directamente)
+- **Bean Validation** (`@NotNull`, `@NotBlank`, `@Positive`, `@Min`) con respuestas 400 estructuradas
+- **Manejo de errores centralizado** con `@RestControllerAdvice` y códigos HTTP correctos (200, 201, 400, 404, 503)
+- **Resiliencia**: si un servicio dependiente no está disponible, se retorna 503 en lugar de un error genérico
+- Endpoints enriquecidos (`/detail`) que combinan datos de múltiples servicios
+- Base de datos MySQL compartida con esquemas separados por servicio
+- Despliegue completo con **Docker Compose**
+
+---
+
+## Requisitos previos
+
+- Docker y Docker Compose instalados
+- Puerto 8081–8090 disponibles
+
+---
+
+## Pasos para ejecutar
+
+**1. Clonar el repositorio**
+```bash
+git clone https://github.com/axlcortspov/Fullstack.git
+cd Fullstack/servicios
+```
+
+**2. Levantar todos los servicios**
 ```bash
 docker compose up -d --build
+```
+
+**3. Verificar que todos los contenedores estén corriendo**
+```bash
+docker ps
+```
+
+**4. Ver logs de un servicio específico**
+```bash
+docker logs order_service -f
+```
+
+**5. Bajar todos los servicios**
+```bash
+docker compose down
+```
+
+> La base de datos se inicializa automáticamente con el archivo `db/init.sql` al primer arranque.
+
+---
+
+## Endpoints principales
+
+### auth-service :8081
+| Método | Endpoint | Descripción |
+|---|---|---|
+| POST | /auth/register | Registrar usuario |
+| POST | /auth/login | Iniciar sesión |
+
+### user-service :8082
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /users | Listar usuarios |
+| GET | /users/{id} | Buscar por ID |
+| POST | /users | Crear usuario |
+| DELETE | /users/{id} | Eliminar usuario |
+
+### product-service :8083
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /products | Listar productos |
+| GET | /products/{id} | Buscar por ID |
+| POST | /products | Crear producto |
+| DELETE | /products/{id} | Eliminar producto |
+
+### cart-service :8084
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /cart | Listar carrito |
+| GET | /cart/user/{userId} | Carrito de un usuario |
+| GET | /cart/{id}/detail | Item con datos de usuario y producto |
+| POST | /cart | Agregar al carrito |
+| PUT | /cart/{id} | Actualizar item |
+| DELETE | /cart/{id} | Eliminar item |
+
+### order-service :8085
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /orders | Listar órdenes |
+| GET | /orders/{id} | Buscar por ID |
+| GET | /orders/user/{userId} | Órdenes de un usuario |
+| GET | /orders/{id}/detail | Orden con datos del usuario |
+| POST | /orders | Crear orden |
+| PUT | /orders/{id}/status | Cambiar estado |
+| DELETE | /orders/{id} | Eliminar orden |
+
+### payment-service :8086
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /payments | Listar pagos |
+| GET | /payments/order/{orderId} | Pagos por orden |
+| GET | /payments/{id}/detail | Pago con datos de la orden |
+| POST | /payments | Crear pago |
+| PUT | /payments/{id} | Actualizar pago |
+| PUT | /payments/{id}/status | Cambiar estado |
+| DELETE | /payments/{id} | Eliminar pago |
+
+### inventory-service :8087
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /inventory | Listar inventario |
+| GET | /inventory/product/{productId} | Stock por producto |
+| GET | /inventory/{id}/detail | Inventario con datos del producto |
+| POST | /inventory | Crear inventario |
+| PUT | /inventory/{id} | Actualizar inventario |
+| PUT | /inventory/{id}/stock | Actualizar stock |
+| DELETE | /inventory/{id} | Eliminar inventario |
+
+### notification-service :8088
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /notifications | Listar notificaciones |
+| GET | /notifications/user/{userId} | Notificaciones por usuario |
+| GET | /notifications/{id}/detail | Notificación con datos del usuario |
+| POST | /notifications | Crear notificación |
+| PUT | /notifications/{id} | Actualizar notificación |
+| PUT | /notifications/{id}/status | Cambiar estado |
+| DELETE | /notifications/{id} | Eliminar notificación |
+
+### review-service :8089
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /reviews | Listar reseñas |
+| GET | /reviews/product/{productId} | Reseñas por producto |
+| GET | /reviews/user/{userId} | Reseñas por usuario |
+| GET | /reviews/{id}/detail | Reseña con usuario y producto |
+| POST | /reviews | Crear reseña |
+| PUT | /reviews/{id} | Actualizar reseña |
+| DELETE | /reviews/{id} | Eliminar reseña |
+
+### shipping-service :8090
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | /shipping | Listar envíos |
+| GET | /shipping/order/{orderId} | Envíos por orden |
+| GET | /shipping/{id}/detail | Envío con datos de la orden |
+| POST | /shipping | Crear envío |
+| PUT | /shipping/{id} | Actualizar envío |
+| PUT | /shipping/{id}/status | Cambiar estado |
+| DELETE | /shipping/{id} | Eliminar envío |
+
+---
+
+## Tecnologías utilizadas
+
+- Java 21
+- Spring Boot 3.4.5
+- Spring Cloud OpenFeign
+- Spring Data JPA + Hibernate
+- Bean Validation (jakarta.validation)
+- MySQL 8.0
+- Docker + Docker Compose
+- Lombok
+- SLF4J (logs)
