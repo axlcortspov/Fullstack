@@ -1,167 +1,360 @@
 services:
-    mysql:
-        image: mysql:8.0
-        container_name: mysql_db
-        restart: always
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-        ports:
-            - "3307:3306"
-        networks:
-            - red_microservicios
-        volumes:
-            - mysql_data:/var/lib/mysql
-            - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-        healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
 
-    auth-service:
-        build: ./servicios/auth-service
-        container_name: auth_service
-        ports:
-            - "8081:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/auth_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
+  # bases de datos
 
-    user-service:
-        build: ./servicios/user-service
-        container_name: user_service
-        ports:
-            - "8082:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/user_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
+  mysql-auth:
+    image: mysql:8.0
+    container_name: mysql_auth
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+    ports:
+      - "3307:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_auth_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-    product-service:
-        build: ./servicios/product-service
-        container_name: product_service
-        ports:
-            - "8083:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/product_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
-    cart-service:
-        build: ./servicios/cart-service
-        container_name: cart_service
-        ports:
-            - "8084:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cart_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
-    order-service:
-        build: ./servicios/order-service
-        container_name: order_service
-        ports:
-            - "8085:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
-    payment-service:
-        build: ./servicios/payment-service
-        container_name: payment_service
-        ports:
-            - "8086:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/payment_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
-    inventory-service:
-        build: ./servicios/inventory-service
-        container_name: inventory_service
-        ports:
-            - "8087:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/inventory_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
-    notification-service:
-        build: ./servicios/notification-service
-        container_name: notification_service
-        ports:
-            - "8088:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/notification_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
-    review-service:
-        build: ./servicios/review-service
-        container_name: review_service
-        ports:
-            - "8089:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/review_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
-    shipping-service:
-        build: ./servicios/shipping-service
-        container_name: shipping_service
-        ports:
-            - "8090:8080"
-        depends_on:
-            mysql:
-                condition: service_healthy
-        networks:
-            - red_microservicios
-        environment:
-            SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/shipping_db
-            SPRING_DATASOURCE_USERNAME: root
-            SPRING_DATASOURCE_PASSWORD: root
+  mysql-user:
+    image: mysql:8.0
+    container_name: mysql_user
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_db
+    ports:
+      - "3308:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_user_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-product:
+    image: mysql:8.0
+    container_name: mysql_product
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: product_db
+    ports:
+      - "3309:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_product_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-cart:
+    image: mysql:8.0
+    container_name: mysql_cart
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cart_db
+    ports:
+      - "3310:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_cart_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-order:
+    image: mysql:8.0
+    container_name: mysql_order
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: order_db
+    ports:
+      - "3311:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_order_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-payment:
+    image: mysql:8.0
+    container_name: mysql_payment
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: payment_db
+    ports:
+      - "3312:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_payment_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-inventory:
+    image: mysql:8.0
+    container_name: mysql_inventory
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: inventory_db
+    ports:
+      - "3313:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_inventory_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-notification:
+    image: mysql:8.0
+    container_name: mysql_notification
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notification_db
+    ports:
+      - "3314:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_notification_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-review:
+    image: mysql:8.0
+    container_name: mysql_review
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: review_db
+    ports:
+      - "3315:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_review_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-shipping:
+    image: mysql:8.0
+    container_name: mysql_shipping
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: shipping_db
+    ports:
+      - "3316:3306"
+    networks:
+      - red_microservicios
+    volumes:
+      - mysql_shipping_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # microservicios
+
+  auth-service:
+    build: ./servicios/auth-service
+    container_name: auth_service
+    ports:
+      - "8081:8080"
+    depends_on:
+      mysql-auth:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-auth:3306/auth_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  user-service:
+    build: ./servicios/user-service
+    container_name: user_service
+    ports:
+      - "8082:8080"
+    depends_on:
+      mysql-user:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-user:3306/user_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  product-service:
+    build: ./servicios/product-service
+    container_name: product_service
+    ports:
+      - "8083:8080"
+    depends_on:
+      mysql-product:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-product:3306/product_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  cart-service:
+    build: ./servicios/cart-service
+    container_name: cart_service
+    ports:
+      - "8084:8080"
+    depends_on:
+      mysql-cart:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-cart:3306/cart_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  order-service:
+    build: ./servicios/order-service
+    container_name: order_service
+    ports:
+      - "8085:8080"
+    depends_on:
+      mysql-order:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-order:3306/order_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  payment-service:
+    build: ./servicios/payment-service
+    container_name: payment_service
+    ports:
+      - "8086:8080"
+    depends_on:
+      mysql-payment:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-payment:3306/payment_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  inventory-service:
+    build: ./servicios/inventory-service
+    container_name: inventory_service
+    ports:
+      - "8087:8080"
+    depends_on:
+      mysql-inventory:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-inventory:3306/inventory_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  notification-service:
+    build: ./servicios/notification-service
+    container_name: notification_service
+    ports:
+      - "8088:8080"
+    depends_on:
+      mysql-notification:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-notification:3306/notification_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  review-service:
+    build: ./servicios/review-service
+    container_name: review_service
+    ports:
+      - "8089:8080"
+    depends_on:
+      mysql-review:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-review:3306/review_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  shipping-service:
+    build: ./servicios/shipping-service
+    container_name: shipping_service
+    ports:
+      - "8090:8080"
+    depends_on:
+      mysql-shipping:
+        condition: service_healthy
+    networks:
+      - red_microservicios
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-shipping:3306/shipping_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
 networks:
-    red_microservicios:
+  red_microservicios:
 
 volumes:
-    mysql_data:
+  mysql_auth_data:
+  mysql_user_data:
+  mysql_product_data:
+  mysql_cart_data:
+  mysql_order_data:
+  mysql_payment_data:
+  mysql_inventory_data:
+  mysql_notification_data:
+  mysql_review_data:
+  mysql_shipping_data:
