@@ -1,0 +1,17 @@
+target/
+.mvn/
+.classpath
+.project
+.settings/
+*.jar
+*.class
+*.log
+*.properties
+.DS_Store
+/.vscode/
+/.idea/
+*.swp
+*.swo
+*~
+.env
+.env.local
