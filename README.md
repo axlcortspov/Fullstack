@@ -95,7 +95,7 @@ docker logs order_service -f
 docker compose down
 ```
 
-> La base de datos se inicializa automáticamente con el archivo `db/init.sql` al primer arranque.
+> Las bases de datos se crean automáticamente con las configuraciones en `docker-compose.yml`. Cada servicio usa Hibernate con `ddl-auto=update` para crear las tablas automáticamente al iniciar.
 
 ---
 
@@ -201,6 +201,53 @@ docker compose down
 
 ---
 
+## Evaluación Parcial 3 (EP3) — Semana 14-15
+
+### Servicios prioritarios con cobertura completa de tests
+
+Los siguientes **5 microservicios** cuentan con tests unitarios en las 4 capas (modelo, servicio, controlador, repositorio):
+
+| Servicio | ModelTest | ServiceTest | ControllerTest | RepositoryTest | Swagger | Estado |
+|---|---|---|---|---|---|---|
+| **product-service** | HECHO | HECHO | HECHO | HECHO | HECHO | Completo |
+| **user-service** | HECHO | HECHO | HECHO | HECHO | HECHO | Completo |
+| **order-service** | HECHO | HECHO | HECHO | HECHO | HECHO | Completo |
+| **cart-service** | HECHO | HECHO | HECHO | HECHO | HECHO | Completo |
+| **payment-service** | HECHO | HECHO | HECHO | HECHO | HECHO | Completo |
+
+### Acceso a documentación Swagger
+
+Cada servicio expone su documentación OpenAPI/Swagger en los siguientes endpoints:
+
+- **product-service** (8083): http://localhost:8083/swagger-ui.html
+- **user-service** (8082): http://localhost:8082/swagger-ui.html
+- **order-service** (8085): http://localhost:8085/swagger-ui.html
+- **cart-service** (8084): http://localhost:8084/swagger-ui.html
+- **payment-service** (8086): http://localhost:8086/swagger-ui.html
+
+**API Gateway centralizado** (puerto 8000):
+- Swagger UI consolidado: http://localhost:8000/swagger-ui.html
+- Rutas configuradas hacia todos los 10 servicios
+
+### Ejecutar tests
+
+Para ejecutar los tests unitarios en cualquier servicio:
+
+```bash
+cd servicios/{servicio-name}
+./mvnw clean test
+```
+
+Ejemplo:
+```bash
+cd servicios/product-service
+./mvnw clean test
+```
+
+Resultado esperado: `BUILD SUCCESS` con todos los tests pasando.
+
+---
+
 ## Tecnologías utilizadas
 
 - Java 21
@@ -208,6 +255,8 @@ docker compose down
 - Spring Cloud OpenFeign
 - Spring Data JPA + Hibernate
 - Bean Validation (jakarta.validation)
+- **JUnit 5** + **Mockito** (testing)
+- **SpringDoc OpenAPI 2.8.9** (Swagger/OpenAPI)
 - MySQL 8.0
 - Docker + Docker Compose
 - Lombok
