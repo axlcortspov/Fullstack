@@ -194,6 +194,19 @@ services:
 
   # microservicios
 
+  eureka-server:
+    build: ./ms-eureka
+    container_name: eureka_server
+    ports:
+      - "8761:8761"
+    networks:
+      - red_microservicios
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8761/eureka/apps || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   auth-service:
     build: ./servicios/auth-service
     container_name: auth_service
@@ -201,6 +214,8 @@ services:
       - "8081:8080"
     depends_on:
       mysql-auth:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
     networks:
       - red_microservicios
@@ -217,6 +232,8 @@ services:
     depends_on:
       mysql-user:
         condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - red_microservicios
     environment:
@@ -231,6 +248,8 @@ services:
       - "8083:8080"
     depends_on:
       mysql-product:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
     networks:
       - red_microservicios
@@ -247,6 +266,8 @@ services:
     depends_on:
       mysql-cart:
         condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - red_microservicios
     environment:
@@ -261,6 +282,8 @@ services:
       - "8085:8080"
     depends_on:
       mysql-order:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
     networks:
       - red_microservicios
@@ -277,6 +300,8 @@ services:
     depends_on:
       mysql-payment:
         condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - red_microservicios
     environment:
@@ -291,6 +316,8 @@ services:
       - "8087:8080"
     depends_on:
       mysql-inventory:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
     networks:
       - red_microservicios
@@ -307,6 +334,8 @@ services:
     depends_on:
       mysql-notification:
         condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - red_microservicios
     environment:
@@ -321,6 +350,8 @@ services:
       - "8089:8080"
     depends_on:
       mysql-review:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
     networks:
       - red_microservicios
@@ -337,18 +368,22 @@ services:
     depends_on:
       mysql-shipping:
         condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - red_microservicios
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-shipping:3306/shipping_db
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-
   api-gateway:
     build: ./api-gateway
     container_name: api_gateway
     ports:
       - "8000:8000"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
     networks:
       - red_microservicios
 

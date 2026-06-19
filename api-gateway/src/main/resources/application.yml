@@ -198,4 +198,11 @@ logging:
   level:
     root: INFO
     org.springframework.cloud.gateway: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+  instance:
+    prefer-ip-address: true
     org.springframework.boot.web: INFO
