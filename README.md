@@ -244,31 +244,6 @@ inventory-service     → product-service
 
 ---
 
-## Eureka Server — Descubrimiento de Servicios
-
-### Acceso al dashboard de Eureka
-
-Una vez que todos los servicios están corriendo, puedes acceder al dashboard de **Eureka Server** en:
-
-**http://localhost:8761**
-
-El dashboard muestra:
-- **Instancias registradas**: lista de todos los microservicios activos
-- **Estado de cada servicio**: si están UP, DOWN o en otro estado
-- **Información de instancias**: hostname, puerto, URL de status
-- **Replicación entre servidores** (si hay múltiples instancias de Eureka)
-
-### Verificar que los servicios estén registrados
-
-Cuando todos los contenedores inician, cada microservicio:
-1. Se conecta automáticamente al Eureka Server en `http://eureka-server:8761/eureka`
-2. Se registra con su nombre: `AUTH-SERVICE`, `USER-SERVICE`, `PRODUCT-SERVICE`, etc.
-3. Envía heartbeats cada 30 segundos para indicar que sigue activo
-4. Se marca como `UP` (disponible) en el dashboard
-
-Si un servicio se detiene, Eureka lo marca como `DOWN` después de algunos heartbeats no recibidos.
-
----
 
 ## Evaluación Parcial 3 (EP3) — Semana 14-15
 
