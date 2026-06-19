@@ -19,7 +19,7 @@ El sistema está compuesto por **10 microservicios**, cada uno corriendo en su p
 
 | Servicio | Puerto | Descripción |
 |---|---|---|
-| **eureka-server** | **8761** | **Descubrimiento de servicios (Netflix Eureka)** |
+| **eureka-server** | **8761** | **Netflix Eureka — Service Registry** |
 | auth-service | 8081 | Registro e inicio de sesión |
 | user-service | 8082 | Gestión de usuarios |
 | product-service | 8083 | Catálogo de productos |
