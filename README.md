@@ -15,10 +15,11 @@ Cada microservicio es independiente, tiene su propia base de datos y se comunica
 
 ## Arquitectura del sistema
 
-El sistema está compuesto por **10 microservicios**, cada uno corriendo en su propio contenedor Docker:
+El sistema está compuesto por **10 microservicios**, cada uno corriendo en su propio contenedor Docker, más un **Eureka Server** para el descubrimiento dinámico de servicios:
 
 | Servicio | Puerto | Descripción |
 |---|---|---|
+| **eureka-server** | **8761** | **Descubrimiento de servicios (Netflix Eureka)** |
 | auth-service | 8081 | Registro e inicio de sesión |
 | user-service | 8082 | Gestión de usuarios |
 | product-service | 8083 | Catálogo de productos |
@@ -49,7 +50,9 @@ inventory-service     → product-service
 ## Funcionalidades implementadas
 
 - CRUD completo en los 10 microservicios
-- Comunicación entre servicios via **Feign Client** con logs SLF4J
+- **Eureka Server (Netflix Eureka)** para descubrimiento dinámico de servicios
+- **Service Discovery**: todos los microservicios se registran automáticamente en Eureka al iniciar
+- Comunicación entre servicios via **Feign Client** con descubrimiento dinámico y logs SLF4J
 - **DTOs** de entrada y salida en todos los servicios (no se exponen entidades directamente)
 - **Bean Validation** (`@NotNull`, `@NotBlank`, `@Positive`, `@Min`) con respuestas 400 estructuradas
 - **Manejo de errores centralizado** con `@RestControllerAdvice` y códigos HTTP correctos (200, 201, 400, 404, 503)
@@ -201,9 +204,73 @@ docker compose down
 
 ---
 
-## Evaluación Parcial 3 (EP3) — Semana 14-15
+## Eureka Server — Descubrimiento de Servicios
 
-### Servicios prioritarios con cobertura completa de tests
+### Acceso al dashboard de Eureka
+
+Una vez que todos los servicios están corriendo, puedes acceder al dashboard de **Eureka Server** en:
+
+**http://localhost:8761**
+
+El dashboard muestra:
+- **Instancias registradas**: lista de todos los microservicios activos
+- **Estado de cada servicio**: si están UP, DOWN o en otro estado
+- **Información de instancias**: hostname, puerto, URL de status
+- **Replicación entre servidores** (si hay múltiples instancias de Eureka)
+
+### Verificar que los servicios estén registrados
+
+Cuando todos los contenedores inician, cada microservicio:
+1. Se conecta automáticamente al Eureka Server en `http://eureka-server:8761/eureka`
+2. Se registra con su nombre: `AUTH-SERVICE`, `USER-SERVICE`, `PRODUCT-SERVICE`, etc.
+3. Envía heartbeats cada 30 segundos para indicar que sigue activo
+4. Se marca como `UP` (disponible) en el dashboard
+
+Si un servicio se detiene, Eureka lo marca como `DOWN` después de algunos heartbeats no recibidos.
+
+### Dependencias entre servicios (Feign Client)
+
+```
+cart-service          → user-service, product-service
+order-service         → user-service
+payment-service       → order-service
+shipping-service      → order-service
+notification-service  → user-service
+review-service        → user-service, product-service
+inventory-service     → product-service
+```
+
+`auth-service`, `user-service` y `product-service` no consumen servicios externos.
+
+---
+
+## Eureka Server — Descubrimiento de Servicios
+
+### Acceso al dashboard de Eureka
+
+Una vez que todos los servicios están corriendo, puedes acceder al dashboard de **Eureka Server** en:
+
+**http://localhost:8761**
+
+El dashboard muestra:
+- **Instancias registradas**: lista de todos los microservicios activos
+- **Estado de cada servicio**: si están UP, DOWN o en otro estado
+- **Información de instancias**: hostname, puerto, URL de status
+- **Replicación entre servidores** (si hay múltiples instancias de Eureka)
+
+### Verificar que los servicios estén registrados
+
+Cuando todos los contenedores inician, cada microservicio:
+1. Se conecta automáticamente al Eureka Server en `http://eureka-server:8761/eureka`
+2. Se registra con su nombre: `AUTH-SERVICE`, `USER-SERVICE`, `PRODUCT-SERVICE`, etc.
+3. Envía heartbeats cada 30 segundos para indicar que sigue activo
+4. Se marca como `UP` (disponible) en el dashboard
+
+Si un servicio se detiene, Eureka lo marca como `DOWN` después de algunos heartbeats no recibidos.
+
+---
+
+## Evaluación Parcial 3 (EP3) — Semana 14-15
 
 Los siguientes **5 microservicios** cuentan con tests unitarios en las 4 capas (modelo, servicio, controlador, repositorio):
 
@@ -253,6 +320,7 @@ Resultado esperado: `BUILD SUCCESS` con todos los tests pasando.
 - Java 21
 - Spring Boot 3.4.5
 - Spring Cloud OpenFeign
+- **Netflix Eureka Server** (Service Discovery)
 - Spring Data JPA + Hibernate
 - Bean Validation (jakarta.validation)
 - **JUnit 5** + **Mockito** (testing)
