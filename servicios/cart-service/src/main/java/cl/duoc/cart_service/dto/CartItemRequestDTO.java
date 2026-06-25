@@ -3,8 +3,14 @@ package cl.duoc.cart_service.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CartItemRequestDTO {
 
     @NotNull(message = "El userId es obligatorio")

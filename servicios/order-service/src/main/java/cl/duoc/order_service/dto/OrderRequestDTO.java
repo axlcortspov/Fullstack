@@ -3,8 +3,13 @@ package cl.duoc.order_service.dto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+
 public class OrderRequestDTO {
 
     @NotNull(message = "El userId es obligatorio")
